@@ -25,7 +25,7 @@
 #
 
 terraform {
-  # `optional()` object attributes, used by the `admin` input, need Terraform 1.3.
+  # The `terraform-google-modules` modules used inside require Terraform 1.3.
   required_version = ">= 1.3.0, < 2.0.0"
 
   required_providers {

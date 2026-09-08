@@ -14,9 +14,9 @@ apps location.
 Requirements
 ----------
 
-The module requires Terraform `1.3.0` or newer and the `google` provider from `6.28.0` up to,
-but not including, `8.0.0`. The upper bound is set by the Google-maintained modules this module
-builds upon. Terraform selects a matching provider during `terraform init`, so the constraints
+The module requires Terraform `1.3.0` or newer, and the `google` and `google-beta` providers from
+`6.28.0` up to, but not including, `8.0.0`. The upper bound is set by the Google-maintained modules
+this module builds upon, which are also the reason `google-beta` is needed. Terraform selects a matching provider during `terraform init`, so the constraints
 only need declaring in your configuration if you want to narrow them further.
 
 Terraform reads Google Cloud credentials through [Application Default Credentials][adc].
@@ -112,7 +112,7 @@ module "delivery" {
   ]
   admin = {   # Configuration of the Admin server [8].
     enabled = true
-    port = 8181   # Port on which the Admin server web interface will be available. Optional parameter. Default is `8080`.
+    port = 8181   # Port on which the Admin server web interface will be available. Optional parameter; `8080` when omitted.
     login = "admin"   # Login to the Delivery Admin web interface [9]. Optional parameter.
     password = "admin"   # Password to the Delivery Admin web interface [9]. Optional parameter.
   }
