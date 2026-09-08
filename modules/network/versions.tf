@@ -25,9 +25,20 @@
 #
 
 terraform {
-  required_version = ">= 1.0.0, < 2.0.0"
+  # The `terraform-google-modules` modules used inside require Terraform 1.3.
+  required_version = ">= 1.3.0, < 2.0.0"
 
   required_providers {
-    google = ">= 3.86.0, < 4.0.0"
+    google = {
+      source = "hashicorp/google"
+      # The upper bound follows the `terraform-google-modules` modules used inside.
+      version = ">= 6.28.0, < 8.0.0"
+    }
+    # Not used directly, but required by the `terraform-google-modules` modules used inside.
+    # Declared so that the requirement is visible to the consumers of this module.
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = ">= 6.28.0, < 8.0.0"
+    }
   }
 }

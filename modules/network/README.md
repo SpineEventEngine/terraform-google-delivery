@@ -1,4 +1,4 @@
-Liquor VPC
+Delivery VPC
 -----------
 
 This module is responsible for preparing a VPC network and subnetworks for the provided

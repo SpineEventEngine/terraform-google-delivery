@@ -25,6 +25,6 @@
 #
 
 output "template" {
-  description = "The Liquor server instance template."
+  description = "The Delivery server instance template."
   value       = module.vm_instance_template
 }

@@ -28,20 +28,24 @@ provider "google" {
   project = var.project
 }
 
-# Init VPC network for Liquor instances.
-module "liquor_network" {
+# Init VPC network for the Delivery server instances.
+module "delivery_network" {
   source = "./modules/network"
 
   project = var.project
   regions = tolist([
     var.region
   ])
-  vpc_name               = "liquor"
-  allow_ingres_tcp_ports = local.adminPort != null ? [local.adminPort] : [8080]
+  vpc_name = "delivery"
+  # The Admin server port is opened only when the Admin server is enabled.
+  allow_ingres_tcp_ports = local.adminEnabled ? [coalesce(local.adminPort, 8080)] : []
 }
 
 locals {
-  adminPort = try(nonsensitive(var.admin.port), null)
+  # The `admin` input is sensitive because of the password. Its `enabled` flag and `port`
+  # decide which firewall rules exist, and Terraform requires such values to be non-sensitive.
+  adminEnabled = nonsensitive(var.admin.enabled)
+  adminPort    = try(nonsensitive(var.admin.port), null)
   adminSettings = [
     { name = "ADMIN_SERVER", value = var.admin.enabled },
     { name = "ADMIN_USERNAME", value = var.admin.login },
@@ -57,24 +61,39 @@ module "instance_template" {
 
   project             = var.project
   region              = var.region
-  network             = module.liquor_network.network
-  subnetwork          = module.liquor_network.subnets[var.region]
+  network             = module.delivery_network.network
+  subnetwork          = module.delivery_network.subnets[var.region]
   container           = var.container
   machine_type        = var.vm_machine_type
   env                 = concat(var.env, local.adminEnv)
   additional_metadata = var.metadata
 }
 
-resource "google_compute_instance_from_template" "liquor-server" {
-  name = "liquor-server"
+resource "google_compute_instance_from_template" "delivery-server" {
+  name = "delivery-server"
   zone = var.zone
 
   source_instance_template = module.instance_template.template.self_link
 
   network_interface {
-    subnetwork = module.liquor_network.subnets[var.region]
+    subnetwork = module.delivery_network.subnets[var.region]
     access_config {
       nat_ip = var.vm_address
     }
   }
+}
+
+# Deployments created with the `SpineEventEngine/spine-liquor/google` module keep their
+# state mapped to the renamed addresses when they switch to this module. The VM and
+# the network are still replaced, because their names changed, but Terraform then
+# orders the replacement so that the old VM releases the static address before
+# the new one claims it.
+moved {
+  from = module.liquor_network
+  to   = module.delivery_network
+}
+
+moved {
+  from = google_compute_instance_from_template.liquor-server
+  to   = google_compute_instance_from_template.delivery-server
 }

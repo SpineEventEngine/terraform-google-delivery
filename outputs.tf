@@ -24,12 +24,12 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-output "liquor" {
-  description = "The name of the created Liquor VM."
-  value       = google_compute_instance_from_template.liquor-server.name
+output "server" {
+  description = "The name of the created Delivery server VM."
+  value       = google_compute_instance_from_template.delivery-server.name
 }
 
 output "network" {
-  description = "A network created for the Liquor instances."
-  value       = module.liquor_network
+  description = "The network created for the Delivery server."
+  value       = module.delivery_network
 }
