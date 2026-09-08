@@ -72,7 +72,7 @@ module "delivery" {
   project    = var.project   # Refers to the “project” variable in the `variables.tf` file.
   region     = var.region   # Refers to the “region” variable in the `variables.tf` file.
   zone       = var.zone   # Refers to the “zone” variable in the `variables.tf` file.
-  container  = "gcr.io/spine-dev/simple-message-delivery-server:v0.9.0"   # A container to be deployed [2].
+  container  = "europe-docker.pkg.dev/spine-event-engine/containers/delivery-server:v0.19.0"   # The Delivery server image to deploy [2].
   vm_address = google_compute_address.delivery-ip.address   # Refers to the `delivery-ip` resource that 
                                                           # we've configured in this file above.
   vm_machine_type = "e2-highcpu-2"   # Type of the GCE instance [3]. Optional parameter.
