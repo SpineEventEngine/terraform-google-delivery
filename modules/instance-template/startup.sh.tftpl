@@ -20,10 +20,13 @@ until docker info >/dev/null 2>&1; do
   docker_wait_elapsed_secs=$((docker_wait_elapsed_secs + docker_wait_sleep_secs))
 done
 
-# The published Delivery server image is public. The credential helper is kept
-# for private images hosted in the same Artifact Registry location.
-docker-credential-gcr configure-docker --registries=europe-docker.pkg.dev
+%{ if google_registry != "" ~}
+# Let Docker authenticate to the Google registry hosting the image with the credentials
+# of the VM's service account. The published Delivery server image is public, but a
+# private image in a registry of the same kind needs this.
+docker-credential-gcr configure-docker --registries="${google_registry}"
 
+%{ endif ~}
 docker stop "${container_name}" || true
 docker rm "${container_name}" || true
 

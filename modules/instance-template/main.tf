@@ -26,6 +26,14 @@
 
 locals {
   container_image_project = var.image_project != "" ? var.image_project : var.project
+
+  # The registry host of the container image, for example `europe-docker.pkg.dev`.
+  container_registry = split("/", var.container)[0]
+
+  # The registry host when it is a Google one, Artifact Registry or Container Registry,
+  # so that the startup script configures the Docker credential helper for it.
+  # Empty for images hosted elsewhere.
+  google_registry = can(regex("(^|\\.)(pkg\\.dev|gcr\\.io)$", local.container_registry)) ? local.container_registry : ""
 }
 
 data "google_compute_default_service_account" "default" {
@@ -65,6 +73,7 @@ module "vm_instance_template" {
   startup_script = templatefile("${path.module}/startup.sh.tftpl", {
     container_name  = "delivery-server"
     container_image = var.container
+    google_registry = local.google_registry
     environment     = var.env
   })
 
