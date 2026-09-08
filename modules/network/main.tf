@@ -62,7 +62,7 @@ locals {
 # of this module for details.
 module "vpc" {
   source  = "terraform-google-modules/network/google"
-  version = "~> 3.4"
+  version = "~> 18.2"
 
   project_id   = var.project
   network_name = var.vpc_name
@@ -73,73 +73,51 @@ module "vpc" {
 
 # Generates a set of firewall rules for the custom VPC.
 #
-# See <a href="https://github.com/terraform-google-modules/terraform-google-network/tree/v3.4.0/modules/firewall-rules">docs</a>
+# See <a href="https://github.com/terraform-google-modules/terraform-google-network/tree/v18.2.0/modules/firewall-rules">docs</a>
 # of this module for details.
 module "firewall_rules" {
   source       = "terraform-google-modules/network/google//modules/firewall-rules"
-  version      = "~> 3.4"
+  version      = "~> 18.2"
   project_id   = var.project
   network_name = module.vpc.network_name
 
-  rules = concat([
+  # The rule names are derived from `var.vpc_name` rather than from the module output above:
+  # the output is unknown until the network is created, and Terraform needs the rule names,
+  # which key the firewall resources, to be known at plan time.
+  ingress_rules = concat([
     {
-      name                    = "${module.vpc.network_name}-allow-ssh-ingress"
-      description             = "Allow SSH from anywhere."
-      direction               = "INGRESS"
-      priority                = null
-      ranges                  = ["0.0.0.0/0"]
-      source_tags             = null
-      source_service_accounts = null
-      target_tags             = null
-      target_service_accounts = null
+      name          = "${var.vpc_name}-allow-ssh-ingress"
+      description   = "Allow SSH from anywhere."
+      source_ranges = ["0.0.0.0/0"]
       allow = [
         {
           protocol = "tcp"
           ports    = ["22"]
         }
       ]
-      deny       = []
-      log_config = null
     },
     {
-      name                    = "${module.vpc.network_name}-allow-grpc"
-      description             = "Allow gRPC ingress."
-      direction               = "INGRESS"
-      priority                = null
-      ranges                  = null
-      source_tags             = null
-      source_service_accounts = null
-      target_tags             = ["grpc"]
-      target_service_accounts = null
+      name        = "${var.vpc_name}-allow-grpc"
+      description = "Allow gRPC ingress."
+      target_tags = ["grpc"]
       allow = [
         {
           protocol = "tcp"
           ports    = ["8484"]
         }
       ]
-      deny       = []
-      log_config = null
     }
     ], length(var.allow_ingres_tcp_ports) > 0 ?
     [
       {
-        name                    = "${module.vpc.network_name}-allow-custom"
-        description             = "Allow custom"
-        direction               = "INGRESS"
-        priority                = null
-        ranges                  = null
-        source_tags             = null
-        source_service_accounts = null
-        target_tags             = null
-        target_service_accounts = null
+        name        = "${var.vpc_name}-allow-custom"
+        description = "Allow custom"
         allow = [
           {
             protocol = "tcp"
             ports    = var.allow_ingres_tcp_ports
           }
         ]
-        deny       = []
-        log_config = null
       }
   ] : [])
 }

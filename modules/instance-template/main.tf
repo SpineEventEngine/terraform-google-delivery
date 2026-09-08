@@ -38,7 +38,7 @@ data "google_compute_default_service_account" "default" {
 # https://registry.terraform.io/modules/terraform-google-modules/vm/google/latest/submodules/instance_template
 module "vm_instance_template" {
   source  = "terraform-google-modules/vm/google//modules/instance_template"
-  version = "~> 7.1"
+  version = "~> 15.2"
 
   project_id          = var.project
   region              = var.region
