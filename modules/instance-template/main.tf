@@ -45,8 +45,8 @@ module "vm_instance_template" {
   name_prefix         = "delivery-${var.region}"
   preemptible         = false
   on_host_maintenance = "MIGRATE"
-  service_account     = {
-    email  = data.google_compute_default_service_account.default.email
+  service_account = {
+    email = data.google_compute_default_service_account.default.email
     scopes = [
       "https://www.googleapis.com/auth/cloud-platform"
     ]
@@ -59,17 +59,17 @@ module "vm_instance_template" {
   disk_size_gb         = 20
   source_image_project = local.container_image_project
   source_image_family  = var.image_family
-  metadata             = merge(var.additional_metadata, tomap({
+  metadata = merge(var.additional_metadata, tomap({
     "google-logging-enabled" = "true"
   }))
-  startup_script       = templatefile("${path.module}/startup.sh.tftpl", {
+  startup_script = templatefile("${path.module}/startup.sh.tftpl", {
     container_name  = "delivery-server"
     container_image = var.container
     environment     = var.env
   })
 
   # See https://cloud.google.com/security/shielded-cloud/shielded-vm for details.
-  enable_shielded_vm       = true
+  enable_shielded_vm = true
   shielded_instance_config = {
     "enable_integrity_monitoring" : true,
     # Enabling this option causes failures during the application start.

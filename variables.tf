@@ -80,7 +80,7 @@ variable "admin" {
     https://developer.hashicorp.com/terraform/tutorials/configuration-language/sensitive-variables#set-values-with-a-tfvars-file
   EOT
   sensitive   = true
-  type        = object({
+  type = object({
     enabled  = bool
     port     = optional(number)
     login    = optional(string)

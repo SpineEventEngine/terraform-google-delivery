@@ -37,7 +37,7 @@ locals {
   region_list = tolist(var.regions)
 
   # An object mapping GCP regions
-  region_to_subnet_name = {for region in var.regions : region => "${var.vpc_name}-${region}"}
+  region_to_subnet_name = { for region in var.regions : region => "${var.vpc_name}-${region}" }
 
   # The list of subnets in a VPC network. The subnet is represented as an object accepted by
   # "terraform-google-network" module. See the form of a subnet input
@@ -48,11 +48,11 @@ locals {
   # to calculate a subnet address within given IP network address prefix of VPC. The index of a GCP region in
   # a list of `local.region_list` is used as a subnet number.
   subnets = toset([
-  for i, region in local.region_list : {
-    subnet_name   = local.region_to_subnet_name[region]
-    subnet_ip     = cidrsubnet(var.cidrsubnet_ip_range, var.cidrsubnet_new_bits, i)
-    subnet_region = region
-  }
+    for i, region in local.region_list : {
+      subnet_name   = local.region_to_subnet_name[region]
+      subnet_ip     = cidrsubnet(var.cidrsubnet_ip_range, var.cidrsubnet_new_bits, i)
+      subnet_region = region
+    }
   ])
 }
 
@@ -81,7 +81,7 @@ module "firewall_rules" {
   project_id   = var.project
   network_name = module.vpc.network_name
 
-  rules = concat( [
+  rules = concat([
     {
       name                    = "${module.vpc.network_name}-allow-ssh-ingress"
       description             = "Allow SSH from anywhere."
@@ -92,7 +92,7 @@ module "firewall_rules" {
       source_service_accounts = null
       target_tags             = null
       target_service_accounts = null
-      allow                   = [
+      allow = [
         {
           protocol = "tcp"
           ports    = ["22"]
@@ -111,7 +111,7 @@ module "firewall_rules" {
       source_service_accounts = null
       target_tags             = ["grpc"]
       target_service_accounts = null
-      allow                   = [
+      allow = [
         {
           protocol = "tcp"
           ports    = ["8484"]
@@ -120,26 +120,26 @@ module "firewall_rules" {
       deny       = []
       log_config = null
     }
-  ], length(var.allow_ingres_tcp_ports) > 0 ?
-  [
-    {
-      name                    = "${module.vpc.network_name}-allow-custom"
-      description             = "Allow custom"
-      direction               = "INGRESS"
-      priority                = null
-      ranges                  = null
-      source_tags             = null
-      source_service_accounts = null
-      target_tags             = null
-      target_service_accounts = null
-      allow                   = [
-        {
-          protocol = "tcp"
-          ports    = var.allow_ingres_tcp_ports
-        }
-      ]
-      deny       = []
-      log_config = null
-    }
+    ], length(var.allow_ingres_tcp_ports) > 0 ?
+    [
+      {
+        name                    = "${module.vpc.network_name}-allow-custom"
+        description             = "Allow custom"
+        direction               = "INGRESS"
+        priority                = null
+        ranges                  = null
+        source_tags             = null
+        source_service_accounts = null
+        target_tags             = null
+        target_service_accounts = null
+        allow = [
+          {
+            protocol = "tcp"
+            ports    = var.allow_ingres_tcp_ports
+          }
+        ]
+        deny       = []
+        log_config = null
+      }
   ] : [])
 }

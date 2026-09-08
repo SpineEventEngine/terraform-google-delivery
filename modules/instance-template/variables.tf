@@ -61,7 +61,7 @@ variable "additional_metadata" {
   default     = {}
 }
 
-variable image_project {
+variable "image_project" {
   description = "The project of the GCE image."
   type        = string
   default     = "cos-cloud"
