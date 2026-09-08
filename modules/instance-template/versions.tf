@@ -34,5 +34,11 @@ terraform {
       # The upper bound follows the `terraform-google-modules` modules used inside.
       version = ">= 6.28.0, < 8.0.0"
     }
+    # Not used directly, but required by the `terraform-google-modules` modules used inside.
+    # Declared so that the requirement is visible to the consumers of this module.
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = ">= 6.28.0, < 8.0.0"
+    }
   }
 }
