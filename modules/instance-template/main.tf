@@ -32,7 +32,7 @@ data "google_compute_default_service_account" "default" {
   # The default service account of GCE instances
 }
 
-# Generates Instance Template for Liquor Server VMs.
+# Generates Instance Template for the Delivery server VMs.
 #
 # For details about all inputs, see the module docs:
 # https://registry.terraform.io/modules/terraform-google-modules/vm/google/latest/submodules/instance_template
@@ -42,7 +42,7 @@ module "vm_instance_template" {
 
   project_id          = var.project
   region              = var.region
-  name_prefix         = "liquor-${var.region}"
+  name_prefix         = "delivery-${var.region}"
   preemptible         = false
   on_host_maintenance = "MIGRATE"
   service_account     = {
@@ -63,7 +63,7 @@ module "vm_instance_template" {
     "google-logging-enabled" = "true"
   }))
   startup_script       = templatefile("${path.module}/startup.sh.tftpl", {
-    container_name  = "liquor-server"
+    container_name  = "delivery-server"
     container_image = var.container
     environment     = var.env
   })
