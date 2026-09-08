@@ -24,9 +24,10 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-provider "google" {
-  project = var.project
-}
+# This module declares no provider configuration of its own. It uses the `google` and
+# `google-beta` configurations of the calling configuration, which lets callers use it
+# with `count`, `for_each`, and `depends_on`, and destroy it cleanly. Every resource
+# names its project explicitly, so the callers' configurations need not set one.
 
 # Init VPC network for the Delivery server instances.
 module "delivery_network" {
@@ -70,8 +71,9 @@ module "instance_template" {
 }
 
 resource "google_compute_instance_from_template" "delivery-server" {
-  name = "delivery-server"
-  zone = var.zone
+  name    = "delivery-server"
+  project = var.project
+  zone    = var.zone
 
   source_instance_template = module.instance_template.template.self_link
 

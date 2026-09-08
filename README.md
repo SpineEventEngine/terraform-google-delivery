@@ -19,8 +19,10 @@ The module requires Terraform `1.3.0` or newer, and the `google` and `google-bet
 this module builds upon, which are also the reason `google-beta` is needed. Terraform selects a matching provider during `terraform init`, so the constraints
 only need declaring in your configuration if you want to narrow them further.
 
-Terraform reads Google Cloud credentials through [Application Default Credentials][adc].
-On a workstation, `gcloud auth application-default login` provides them.
+The module declares no provider configuration of its own and uses the `google` and `google-beta`
+configurations of your root configuration, as the example below shows. Terraform reads Google Cloud
+credentials through [Application Default Credentials][adc]. On a workstation,
+`gcloud auth application-default login` provides them.
 
 Deployment configuration
 ----------

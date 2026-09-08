@@ -37,7 +37,8 @@ locals {
 }
 
 data "google_compute_default_service_account" "default" {
-  # The default service account of GCE instances
+  # The default service account of GCE instances.
+  project = var.project
 }
 
 # Generates Instance Template for the Delivery server VMs.
