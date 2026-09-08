@@ -78,3 +78,18 @@ resource "google_compute_instance_from_template" "delivery-server" {
     }
   }
 }
+
+# Deployments created with the `SpineEventEngine/spine-liquor/google` module keep their
+# state mapped to the renamed addresses when they switch to this module. The VM and
+# the network are still replaced, because their names changed, but Terraform then
+# orders the replacement so that the old VM releases the static address before
+# the new one claims it.
+moved {
+  from = module.liquor_network
+  to   = module.delivery_network
+}
+
+moved {
+  from = google_compute_instance_from_template.liquor-server
+  to   = google_compute_instance_from_template.delivery-server
+}

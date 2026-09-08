@@ -152,6 +152,16 @@ on the server. By default, this option is disabled.
 parameters are optional and have default values we recommend to set your own `login` and `password`. The instruction
 of how to set sensitive values to the Terraform configuration is available in the [docs][tfvars].
 
+Migrating from the Liquor module
+----------
+
+A deployment created with `SpineEventEngine/spine-liquor/google` can switch the `source` of its
+module block to `SpineEventEngine/delivery/google` and run `terraform plan`. The module carries
+`moved` blocks for the renamed VM and network, so Terraform recognizes the existing resources and
+plans their replacement rather than an unrelated creation. Expect the VM and the network to be
+recreated under the new names, with a downtime while that happens. The static IP address is
+declared outside the module and is kept.
+
 [adc]: https://cloud.google.com/docs/authentication/application-default-credentials
 [delivery-repo]: https://github.com/SpineEventEngine/delivery
 [e2-machine]: https://cloud.google.com/compute/docs/general-purpose-machines#e2_machine_types_table
