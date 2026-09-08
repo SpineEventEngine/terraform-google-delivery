@@ -44,7 +44,7 @@ module "delivery_network" {
 locals {
   # The `admin` input is sensitive because of the password. Its `enabled` flag and `port`
   # decide which firewall rules exist, and Terraform requires such values to be non-sensitive.
-  adminEnabled = try(nonsensitive(var.admin.enabled), var.admin.enabled)
+  adminEnabled = nonsensitive(var.admin.enabled)
   adminPort    = try(nonsensitive(var.admin.port), null)
   adminSettings = [
     { name = "ADMIN_SERVER", value = var.admin.enabled },
