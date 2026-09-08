@@ -146,13 +146,13 @@ the shard was picked last time and current time is equal to or more than `SHARD_
 is considered stale and can be picked up again. The check is performed when a session is asked for picking up.
 
 **[8]** This block configures the Admin server web interface that allows real-time monitoring of the shard processing
-on the server. By default, this option is disabled.
+on the server. By default, this option is disabled, and the firewall opens the Admin server port only when it is enabled.
 
 **[9]** The Delivery server image accepts `admin` as both the default login and the default password. Even though these
 parameters are optional and have default values we recommend to set your own `login` and `password`. The instruction
 of how to set sensitive values to the Terraform configuration is available in the [docs][tfvars].
 
-Migrating from the Liquor module
+Migrating from the `spine-liquor` module
 ----------
 
 A deployment created with `SpineEventEngine/spine-liquor/google` can switch the `source` of its
