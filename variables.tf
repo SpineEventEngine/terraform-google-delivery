@@ -59,9 +59,9 @@ variable "env" {
   description = <<EOT
     Environment variables to set for the Delivery server.
 
-    Please pay attention that the effect will depend on the particular image used.
-    As an example the `MAX_INBOUND_MESSAGE_SIZE` and `SHARD_PROCESSING_TIMEOUT` are only accepted by
-    the `simple-server` implementation and will not affect the behaviour of the `server`.
+    The variables the server reads, such as `MAX_INBOUND_MESSAGE_SIZE`, `SHARD_PROCESSING_TIMEOUT`,
+    `USE_REDIS`, and `REDIS_HOST`, are described in the server documentation:
+    https://github.com/SpineEventEngine/delivery/blob/master/server/README.md
   EOT
   type        = list(object({ name = string, value = string }))
   default     = []

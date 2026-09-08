@@ -89,15 +89,16 @@ module "delivery" {
   ]
   admin = {   # Configuration of the Admin server [8].
     enabled = true
-    port = 8181   # Port on which the Admin server web interface will be available. Optional parameter. Default is `8181`.
+    port = 8181   # Port on which the Admin server web interface will be available. Optional parameter. Default is `8080`.
     login = "admin"   # Login to the Delivery Admin web interface [9]. Optional parameter.
     password = "admin"   # Password to the Delivery Admin web interface [9]. Optional parameter.
   }
 }
 ```
-**[2]** There are 2 possible containers to choose from: “simple-server” and “server”. The “simple-server” 
-is the recommended choice, as it supports all latest features and shows better performance in general. 
-The “server” is experimental solution that may undergo a significant changes lately.
+**[2]** The Delivery server is distributed as a Docker image on the public Google Artifact Registry.
+Every release is tagged `v<version>`, and the `latest` tag follows the `master` branch of the
+[`delivery`][delivery-repo] repository. Pin a release tag in production, so that a reboot of the VM
+does not pull a different server.
 
 **[3]** This parameter allows to set the machine type that will be running the Delivery server. By default, the value
 is set to `e2-highcpu-2`([machine description][e2-machine]) so this parameter may be safely deleted if you don't want 
@@ -108,33 +109,30 @@ to the [docs][gce-machine-resource].
 
 **[5]** The parameter allows to set environment variables to the container (not to the instance running the container),
 those environment variables will be available for the JVM running the Delivery server and to the Delivery server application itself.
-Tne parameter is optional and can be safely removed if you don't need to set any environment variables.
+The parameter is optional and can be safely removed if you don't need to set any environment variables.
+The variables the server reads, including the storage mode ones such as `USE_REDIS` and `REDIS_HOST`,
+are described in the [server documentation][server-readme].
 
-**[6]** This environment variable is checked by the Delivery server to modify the `gRPC` inbound message size parameter. 
+**[6]** This environment variable is checked by the Delivery server to modify the `gRPC` inbound message size parameter.
 By default, gRPC allows 4 MB of the max inbound message size. If your payload may exceed this default value
-it's recommended to set a custom value using this parameter. **Pay attention that this feature is only available on 
-the “simple-server” containers starting from the `0.7.3` version.** Setting this environment variable for the container
-that doesn't support this functionality will take no effects.
+it's recommended to set a custom value using this parameter.
 
 **[7]** This environment variable is checked by the Delivery server and configures the stale shards auto release procedure.
 This procedure allows picking up already occupied shard if one is considered stale. If a gap between a time when
-the shard was picked last time and current time is equal to or more than `SHARD_PROCESSING_TIMEOUT`, the session 
-is considered stale and can be picked up again. The check is performed when a session is asked for picking up. **Pay 
-attention that this feature is only available on the “simple-server” containers starting from the `0.8.3` version.** 
-Setting this environment variable for the container that doesn't support this functionality will take no effects.
+the shard was picked last time and current time is equal to or more than `SHARD_PROCESSING_TIMEOUT`, the session
+is considered stale and can be picked up again. The check is performed when a session is asked for picking up.
 
 **[8]** This block configures the Admin server web interface that allows real-time monitoring of the shard processing
-on the server. By default, this option is disabled. **This feature is available for both “simple-server”  and “server” 
-containers starting from the version `0.8.8`.** Using this setting with containers of lower versions will 
-take no effect.
+on the server. By default, this option is disabled.
 
-**[9]** By default, the `login` and `password` parameters are determined by the deployed container, so please refer 
-to the corresponding container documentation to check what is this values for your container. Even though these 
-parameters are optional and have default values we recommend to set your own `login` and `password`. The instruction 
+**[9]** The Delivery server image accepts `admin` as both the default login and the default password. Even though these
+parameters are optional and have default values we recommend to set your own `login` and `password`. The instruction
 of how to set sensitive values to the Terraform configuration is available in the [docs][tfvars].
 
+[delivery-repo]: https://github.com/SpineEventEngine/delivery
 [e2-machine]: https://cloud.google.com/compute/docs/general-purpose-machines#e2_machine_types_table
 [gce-machine-resource]: https://cloud.google.com/compute/docs/machine-resource
 [instance-metadata]: https://cloud.google.com/compute/docs/metadata/overview
 [regions-zones]: https://cloud.google.com/compute/docs/regions-zones
+[server-readme]: https://github.com/SpineEventEngine/delivery/blob/master/server/README.md
 [tfvars]: https://developer.hashicorp.com/terraform/tutorials/configuration-language/sensitive-variables#set-values-with-a-tfvars-file
