@@ -25,11 +25,11 @@
 #
 
 output "server" {
-  description = "The name of the created Liquor VM."
+  description = "The name of the created Delivery server VM."
   value       = google_compute_instance_from_template.delivery-server.name
 }
 
 output "network" {
-  description = "A network created for the Liquor instances."
+  description = "The network created for the Delivery server."
   value       = module.delivery_network
 }

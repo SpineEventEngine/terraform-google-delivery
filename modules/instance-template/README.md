@@ -1,4 +1,4 @@
-Liquor Instance Template
+Delivery Server Instance Template
 ------
 
 This is a Terraform module that allows to create a GCE Instance template from the

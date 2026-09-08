@@ -25,22 +25,22 @@
 #
 
 variable "project" {
-  description = "The ID of Google Cloud Project where the Liquor will be deployed."
+  description = "The ID of the Google Cloud project where the Delivery server will be deployed."
   type        = string
 }
 
 variable "region" {
-  description = "The GCP region of an Liquor instance group zone."
+  description = "The GCP region to place the Delivery server resources in."
   type        = string
 }
 
 variable "zone" {
-  description = "The GCP zone where instance group must be placed."
+  description = "The GCP zone where the Delivery server VM must be placed."
   type        = string
 }
 
 variable "container" {
-  description = "The GCE container image FQN to be used by the Liquor instances."
+  description = "The full name of the Delivery server container image to run on the VM."
   type        = string
 }
 
@@ -50,14 +50,14 @@ variable "vm_address" {
 }
 
 variable "vm_machine_type" {
-  description = "The GCE VM machine type to be used for the Liquor instances."
+  description = "The GCE VM machine type to be used for the Delivery server."
   type        = string
   default     = "e2-highcpu-2"
 }
 
 variable "env" {
   description = <<EOT
-    Environment variables to set for the Liquor server.
+    Environment variables to set for the Delivery server.
 
     Please pay attention that the effect will depend on the particular image used.
     As an example the `MAX_INBOUND_MESSAGE_SIZE` and `SHARD_PROCESSING_TIMEOUT` are only accepted by
@@ -75,7 +75,7 @@ variable "metadata" {
 
 variable "admin" {
   description = <<EOT
-    Configuration for the Admin Server of the Liquor image.
+    Configuration for the Admin Server of the Delivery server image.
     The guide on how to provide sensitive data to the template and avoid passing it to the VCS:
     https://developer.hashicorp.com/terraform/tutorials/configuration-language/sensitive-variables#set-values-with-a-tfvars-file
   EOT
