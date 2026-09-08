@@ -11,6 +11,17 @@ Following the best practices, the Delivery server will reside in its own VPC and
 When working with App Engine applications, consider picking up a region closed to the App Engine
 apps location.
 
+Requirements
+----------
+
+The module requires Terraform `1.3.0` or newer and the `google` provider from `6.28.0` up to,
+but not including, `8.0.0`. The upper bound is set by the Google-maintained modules this module
+builds upon. Terraform selects a matching provider during `terraform init`, so the constraints
+only need declaring in your configuration if you want to narrow them further.
+
+Terraform reads Google Cloud credentials through [Application Default Credentials][adc].
+On a workstation, `gcloud auth application-default login` provides them.
+
 Deployment configuration
 ----------
 
@@ -45,7 +56,19 @@ variable "zone" {
 
 `delivery.tf`:
 ```terraform
-terraform { 
+terraform {
+  required_version = ">= 1.3.0"
+
+  required_providers {
+    google = {   # The module was tested with the `7.46` line of the “google” providers.
+      source  = "hashicorp/google"
+      version = "~> 7.46"
+    }
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = "~> 7.46"
+    }
+  }
 }
 
 provider "google" {   # Enables the “google” provider.
@@ -129,6 +152,7 @@ on the server. By default, this option is disabled.
 parameters are optional and have default values we recommend to set your own `login` and `password`. The instruction
 of how to set sensitive values to the Terraform configuration is available in the [docs][tfvars].
 
+[adc]: https://cloud.google.com/docs/authentication/application-default-credentials
 [delivery-repo]: https://github.com/SpineEventEngine/delivery
 [e2-machine]: https://cloud.google.com/compute/docs/general-purpose-machines#e2_machine_types_table
 [gce-machine-resource]: https://cloud.google.com/compute/docs/machine-resource
