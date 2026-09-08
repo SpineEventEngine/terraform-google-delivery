@@ -36,12 +36,16 @@ module "delivery_network" {
   regions = tolist([
     var.region
   ])
-  vpc_name               = "delivery"
-  allow_ingres_tcp_ports = local.adminPort != null ? [local.adminPort] : [8080]
+  vpc_name = "delivery"
+  # The Admin server port is opened only when the Admin server is enabled.
+  allow_ingres_tcp_ports = local.adminEnabled ? [coalesce(local.adminPort, 8080)] : []
 }
 
 locals {
-  adminPort = try(nonsensitive(var.admin.port), null)
+  # The `admin` input is sensitive because of the password. Its `enabled` flag and `port`
+  # decide which firewall rules exist, and Terraform requires such values to be non-sensitive.
+  adminEnabled = try(nonsensitive(var.admin.enabled), var.admin.enabled)
+  adminPort    = try(nonsensitive(var.admin.port), null)
   adminSettings = [
     { name = "ADMIN_SERVER", value = var.admin.enabled },
     { name = "ADMIN_USERNAME", value = var.admin.login },
