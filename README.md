@@ -93,7 +93,7 @@ resource "google_compute_address" "delivery-ip" {   # IP the main application wi
 
 module "delivery" {
   source     = "SpineEventEngine/delivery/google"
-  version    = "0.11.0"   # Version of the `delivery` Terraform module.
+  version    = "0.12.0"   # Version of the `delivery` Terraform module.
   project    = var.project   # Refers to the “project” variable in the `variables.tf` file.
   region     = var.region   # Refers to the “region” variable in the `variables.tf` file.
   zone       = var.zone   # Refers to the “zone” variable in the `variables.tf` file.
