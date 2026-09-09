@@ -24,6 +24,10 @@ configurations of your root configuration, as the example below shows. Terraform
 credentials through [Application Default Credentials][adc]. On a workstation,
 `gcloud auth application-default login` provides them.
 
+The tests in the `tests` directory run with `terraform test`. They mock the providers, so they
+need no Google Cloud project, but they need Terraform `1.7.0` or newer, which introduced the
+provider mocks. The module itself keeps the requirement above.
+
 Deployment configuration
 ----------
 
