@@ -28,7 +28,7 @@ module "delivery_network" {
   vpc_name  = "delivery"
   grpc_port = var.port
   # The Admin server port is opened only when the Admin server is enabled.
-  allow_ingres_tcp_ports = local.adminEnabled ? [coalesce(local.adminPort, 8080)] : []
+  allow_ingres_tcp_ports = local.adminEnabled ? [local.adminServerPort] : []
 }
 
 locals {
@@ -42,6 +42,8 @@ locals {
   # decide which firewall rules exist, and Terraform requires such values to be non-sensitive.
   adminEnabled = nonsensitive(var.admin.enabled)
   adminPort    = try(nonsensitive(var.admin.port), null)
+  # The port the Admin server listens on: the configured one, or the Micronaut default.
+  adminServerPort = coalesce(local.adminPort, 8080)
   adminSettings = [
     { name = "ADMIN_SERVER", value = var.admin.enabled },
     { name = "ADMIN_USERNAME", value = var.admin.login },
@@ -76,6 +78,21 @@ resource "google_compute_instance_from_template" "delivery-server" {
     subnetwork = module.delivery_network.subnets[var.region]
     access_config {
       nat_ip = var.vm_address
+    }
+  }
+
+  # The container runs with `--network host`, and the launcher runs the Delivery server and
+  # the Admin server as two threads of one JVM, so the two share the port space of the VM
+  # with each other and with the SSH daemon. A port taken twice fails to bind at boot, and
+  # nothing reports it to Terraform: the VM stays up without the Admin interface, or keeps
+  # restarting the container when it is the Delivery server that lost the port.
+  #
+  # The check is a precondition rather than a `validation` of `var.port`, because validation
+  # across variables needs Terraform 1.9, while this module supports 1.3.
+  lifecycle {
+    precondition {
+      condition     = var.port != 22 && (!local.adminEnabled || var.port != local.adminServerPort)
+      error_message = "The `port` must differ from the SSH port (22) and from the port of the Admin server."
     }
   }
 }
