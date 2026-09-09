@@ -32,6 +32,21 @@ variable "container" {
   type        = string
 }
 
+variable "port" {
+  description = <<EOT
+    The TCP port on which the Delivery server accepts gRPC connections.
+
+    The module opens the port in the firewall and passes it to the server as the `PORT`
+    environment variable.
+  EOT
+  type        = number
+  default     = 8484
+  validation {
+    condition     = var.port >= 1 && var.port <= 65535
+    error_message = "The `port` must be a TCP port number, from 1 to 65535."
+  }
+}
+
 variable "vm_address" {
   description = "The GCE VM static IP address to be assigned to the VM."
   type        = string
@@ -50,9 +65,18 @@ variable "env" {
     The variables the server reads, such as `MAX_INBOUND_MESSAGE_SIZE`, `SHARD_PROCESSING_TIMEOUT`,
     `USE_REDIS`, and `REDIS_HOST`, are described in the server documentation:
     https://github.com/SpineEventEngine/delivery/blob/master/server/README.md
+
+    The variables set by the module from the `port` and `admin` inputs cannot be listed here.
   EOT
   type        = list(object({ name = string, value = string }))
   default     = []
+  validation {
+    condition = alltrue([
+      for item in var.env :
+      !contains(["PORT", "ADMIN_SERVER", "ADMIN_USERNAME", "ADMIN_PASSWORD", "MICRONAUT_SERVER_PORT"], item.name)
+    ])
+    error_message = "The `PORT`, `ADMIN_SERVER`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `MICRONAUT_SERVER_PORT` variables are set by the module from the `port` and `admin` inputs, and cannot be listed in `env`."
+  }
 }
 
 variable "metadata" {

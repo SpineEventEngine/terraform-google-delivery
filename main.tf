@@ -25,12 +25,19 @@ module "delivery_network" {
   regions = tolist([
     var.region
   ])
-  vpc_name = "delivery"
+  vpc_name  = "delivery"
+  grpc_port = var.port
   # The Admin server port is opened only when the Admin server is enabled.
   allow_ingres_tcp_ports = local.adminEnabled ? [coalesce(local.adminPort, 8080)] : []
 }
 
 locals {
+  # The server reads the port of its gRPC endpoint from the `PORT` environment variable:
+  # https://github.com/SpineEventEngine/delivery/blob/master/server/README.md
+  portEnv = [
+    { name = "PORT", value = var.port }
+  ]
+
   # The `admin` input is sensitive because of the password. Its `enabled` flag and `port`
   # decide which firewall rules exist, and Terraform requires such values to be non-sensitive.
   adminEnabled = nonsensitive(var.admin.enabled)
@@ -54,7 +61,7 @@ module "instance_template" {
   subnetwork          = module.delivery_network.subnets[var.region]
   container           = var.container
   machine_type        = var.vm_machine_type
-  env                 = concat(var.env, local.adminEnv)
+  env                 = concat(var.env, local.portEnv, local.adminEnv)
   additional_metadata = var.metadata
 }
 
