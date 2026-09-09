@@ -91,7 +91,7 @@ module "firewall_rules" {
       allow = [
         {
           protocol = "tcp"
-          ports    = ["8484"]
+          ports    = [var.grpc_port]
         }
       ]
     }

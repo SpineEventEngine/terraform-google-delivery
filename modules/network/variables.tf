@@ -44,3 +44,9 @@ variable "allow_ingres_tcp_ports" {
   type        = list(number)
   default     = []
 }
+
+variable "grpc_port" {
+  description = "The TCP port to open for gRPC ingress on the instances tagged `grpc`."
+  type        = number
+  default     = 8484
+}
