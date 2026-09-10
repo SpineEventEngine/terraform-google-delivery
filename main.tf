@@ -47,13 +47,17 @@ locals {
   # The TCP ports the VM listens on: SSH, the Delivery server, and the Admin server when enabled.
   vmPorts = concat([22, var.port], local.adminEnabled ? [local.adminServerPort] : [])
   adminSettings = [
-    { name = "ADMIN_SERVER", value = var.admin.enabled },
     { name = "ADMIN_USERNAME", value = var.admin.login },
     { name = "ADMIN_PASSWORD", value = var.admin.password },
     { name = "MICRONAUT_SERVER_PORT", value = var.admin.port },
   ]
 
-  adminEnv = [for item in local.adminSettings : item if item.value != null]
+  # The flag is passed always, the settings only when the Admin server is enabled, so that
+  # its credentials and port do not reach the VM while the server is off.
+  adminEnv = concat(
+    [{ name = "ADMIN_SERVER", value = var.admin.enabled }],
+    local.adminEnabled ? [for item in local.adminSettings : item if item.value != null] : []
+  )
 }
 
 module "instance_template" {

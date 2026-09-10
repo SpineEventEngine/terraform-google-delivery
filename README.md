@@ -156,6 +156,7 @@ is considered stale and can be picked up again. The check is performed when a se
 
 **[8]** This block configures the Admin server web interface that allows real-time monitoring of the shard processing
 on the server. By default, this option is disabled, and the firewall opens the Admin server port only when it is enabled.
+The login, password, and port reach the container only when it is enabled, too.
 
 **[9]** The Delivery server image accepts `admin` as both the default login and the default password. Even though these
 parameters are optional and have default values we recommend to set your own `login` and `password`. The instruction
