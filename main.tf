@@ -35,7 +35,7 @@ locals {
   # The server reads the port of its gRPC endpoint from the `PORT` environment variable:
   # https://github.com/SpineEventEngine/delivery/blob/master/server/README.md
   portEnv = [
-    { name = "PORT", value = var.port }
+    { name = "PORT", value = tostring(var.port) }
   ]
 
   # The `admin` input is sensitive because of the password. Its `enabled` flag and `port`
@@ -49,13 +49,13 @@ locals {
   adminSettings = [
     { name = "ADMIN_USERNAME", value = var.admin.login },
     { name = "ADMIN_PASSWORD", value = var.admin.password },
-    { name = "MICRONAUT_SERVER_PORT", value = var.admin.port },
+    { name = "MICRONAUT_SERVER_PORT", value = tostring(var.admin.port) },
   ]
 
   # The flag is passed always, the settings only when the Admin server is enabled, so that
   # its credentials and port do not reach the VM while the server is off.
   adminEnv = concat(
-    [{ name = "ADMIN_SERVER", value = var.admin.enabled }],
+    [{ name = "ADMIN_SERVER", value = tostring(var.admin.enabled) }],
     local.adminEnabled ? [for item in local.adminSettings : item if item.value != null] : []
   )
 }
