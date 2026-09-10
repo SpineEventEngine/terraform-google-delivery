@@ -56,3 +56,39 @@ run "grpc_port_out_of_range_rejected" {
   }
   expect_failures = [var.grpc_port]
 }
+
+run "custom_ports_accepted" {
+  command = plan
+  module {
+    source = "./modules/network"
+  }
+  variables {
+    allow_ingres_tcp_ports = [8080, 8181]
+  }
+  assert {
+    condition     = output.subnets["europe-west1"] == "delivery-europe-west1"
+    error_message = "Valid custom ports must be accepted."
+  }
+}
+
+run "fractional_custom_port_rejected" {
+  command = plan
+  module {
+    source = "./modules/network"
+  }
+  variables {
+    allow_ingres_tcp_ports = [8080, 8181.5]
+  }
+  expect_failures = [var.allow_ingres_tcp_ports]
+}
+
+run "custom_port_out_of_range_rejected" {
+  command = plan
+  module {
+    source = "./modules/network"
+  }
+  variables {
+    allow_ingres_tcp_ports = [70000]
+  }
+  expect_failures = [var.allow_ingres_tcp_ports]
+}

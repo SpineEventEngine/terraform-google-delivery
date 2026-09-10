@@ -43,6 +43,12 @@ variable "allow_ingres_tcp_ports" {
   description = "Ports that will be added to the firewall exceptions to allow connection over TCP protocol."
   type        = list(number)
   default     = []
+  validation {
+    condition = alltrue([
+      for port in var.allow_ingres_tcp_ports : port == floor(port) && port >= 1 && port <= 65535
+    ])
+    error_message = "Every element of `allow_ingres_tcp_ports` must be a TCP port number: a whole number from 1 to 65535."
+  }
 }
 
 variable "grpc_port" {
