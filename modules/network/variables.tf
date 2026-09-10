@@ -43,4 +43,20 @@ variable "allow_ingres_tcp_ports" {
   description = "Ports that will be added to the firewall exceptions to allow connection over TCP protocol."
   type        = list(number)
   default     = []
+  validation {
+    condition = alltrue([
+      for port in var.allow_ingres_tcp_ports : port == floor(port) && port >= 1 && port <= 65535
+    ])
+    error_message = "Every element of `allow_ingres_tcp_ports` must be a TCP port number: a whole number from 1 to 65535."
+  }
+}
+
+variable "grpc_port" {
+  description = "The TCP port to open for gRPC ingress on the instances tagged `grpc`."
+  type        = number
+  default     = 8484
+  validation {
+    condition     = var.grpc_port == floor(var.grpc_port) && var.grpc_port >= 1 && var.grpc_port <= 65535
+    error_message = "The `grpc_port` must be a TCP port number: a whole number from 1 to 65535."
+  }
 }

@@ -91,7 +91,7 @@ module "firewall_rules" {
       allow = [
         {
           protocol = "tcp"
-          ports    = ["8484"]
+          ports    = [tostring(var.grpc_port)]
         }
       ]
     }
@@ -103,7 +103,7 @@ module "firewall_rules" {
         allow = [
           {
             protocol = "tcp"
-            ports    = var.allow_ingres_tcp_ports
+            ports    = [for port in var.allow_ingres_tcp_ports : tostring(port)]
           }
         ]
       }

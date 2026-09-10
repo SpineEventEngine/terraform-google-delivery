@@ -17,6 +17,21 @@ output "server" {
   value       = google_compute_instance_from_template.delivery-server.name
 }
 
+output "ip_address" {
+  description = <<EOT
+    The external IP address of the Delivery server VM.
+
+    Reading this output makes the reader depend on the VM, so that the resources configured
+    with the address of the server are created after the server itself.
+  EOT
+  value       = google_compute_instance_from_template.delivery-server.network_interface[0].access_config[0].nat_ip
+}
+
+output "port" {
+  description = "The TCP port on which the Delivery server accepts gRPC connections."
+  value       = var.port
+}
+
 output "network" {
   description = "The network created for the Delivery server."
   value       = module.delivery_network

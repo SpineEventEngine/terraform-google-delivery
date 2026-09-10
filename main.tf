@@ -25,24 +25,46 @@ module "delivery_network" {
   regions = tolist([
     var.region
   ])
-  vpc_name = "delivery"
+  vpc_name  = "delivery"
+  grpc_port = var.port
   # The Admin server port is opened only when the Admin server is enabled.
-  allow_ingres_tcp_ports = local.adminEnabled ? [coalesce(local.adminPort, 8080)] : []
+  allow_ingres_tcp_ports = local.adminEnabled ? [local.adminServerPort] : []
 }
 
 locals {
+  # The server reads the port of its gRPC endpoint from the `PORT` environment variable:
+  # https://github.com/SpineEventEngine/delivery/blob/master/server/README.md
+  portEnv = [
+    { name = "PORT", value = tostring(var.port) }
+  ]
+
   # The `admin` input is sensitive because of the password. Its `enabled` flag and `port`
   # decide which firewall rules exist, and Terraform requires such values to be non-sensitive.
   adminEnabled = nonsensitive(var.admin.enabled)
   adminPort    = try(nonsensitive(var.admin.port), null)
-  adminSettings = [
-    { name = "ADMIN_SERVER", value = var.admin.enabled },
-    { name = "ADMIN_USERNAME", value = var.admin.login },
-    { name = "ADMIN_PASSWORD", value = var.admin.password },
-    { name = "MICRONAUT_SERVER_PORT", value = var.admin.port },
-  ]
+  # The port the Admin server listens on: the configured one, or the Micronaut default.
+  adminServerPort = coalesce(local.adminPort, 8080)
+  # The TCP ports the VM listens on: SSH, the Delivery server, and the Admin server when enabled.
+  vmPorts = concat([22, var.port], local.adminEnabled ? [local.adminServerPort] : [])
+  # Whether the login and the password are set. The validation of `admin` guarantees they
+  # are set together.
+  adminHasCredentials = nonsensitive(var.admin.login != null)
 
-  adminEnv = [for item in local.adminSettings : item if item.value != null]
+  # The flag is passed always, the settings only when the Admin server is enabled, so that
+  # its credentials and port do not reach the VM while the server is off. The settings are
+  # selected by non-sensitive conditions: comparing the credentials themselves would mark
+  # the whole list, and with it the startup script, sensitive even when it carries no secret,
+  # hiding its changes from the plan.
+  adminEnv = concat(
+    [{ name = "ADMIN_SERVER", value = tostring(local.adminEnabled) }],
+    local.adminEnabled && local.adminHasCredentials ? [
+      { name = "ADMIN_USERNAME", value = var.admin.login },
+      { name = "ADMIN_PASSWORD", value = var.admin.password },
+    ] : [],
+    local.adminEnabled && local.adminPort != null ? [
+      { name = "MICRONAUT_SERVER_PORT", value = tostring(local.adminPort) },
+    ] : [],
+  )
 }
 
 module "instance_template" {
@@ -54,7 +76,7 @@ module "instance_template" {
   subnetwork          = module.delivery_network.subnets[var.region]
   container           = var.container
   machine_type        = var.vm_machine_type
-  env                 = concat(var.env, local.adminEnv)
+  env                 = concat(var.env, local.portEnv, local.adminEnv)
   additional_metadata = var.metadata
 }
 
@@ -69,6 +91,21 @@ resource "google_compute_instance_from_template" "delivery-server" {
     subnetwork = module.delivery_network.subnets[var.region]
     access_config {
       nat_ip = var.vm_address
+    }
+  }
+
+  # The container runs with `--network host`, and the launcher runs the Delivery server and
+  # the Admin server as two threads of one JVM, so the two share the port space of the VM
+  # with each other and with the SSH daemon. A port taken twice fails to bind at boot, and
+  # nothing reports it to Terraform: the VM stays up without the Admin interface, or keeps
+  # restarting the container when it is the Delivery server that lost the port.
+  #
+  # The check is a precondition rather than a `validation` of `var.port` or `var.admin`,
+  # because validation across variables needs Terraform 1.9, while this module supports 1.3.
+  lifecycle {
+    precondition {
+      condition     = length(distinct(local.vmPorts)) == length(local.vmPorts)
+      error_message = "The `port`, the port of the Admin server, and the SSH port (22) must differ from each other."
     }
   }
 }
