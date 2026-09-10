@@ -49,13 +49,15 @@ locals {
   adminSettings = [
     { name = "ADMIN_USERNAME", value = var.admin.login },
     { name = "ADMIN_PASSWORD", value = var.admin.password },
-    { name = "MICRONAUT_SERVER_PORT", value = tostring(var.admin.port) },
+    { name = "MICRONAUT_SERVER_PORT", value = tostring(local.adminPort) },
   ]
 
   # The flag is passed always, the settings only when the Admin server is enabled, so that
-  # its credentials and port do not reach the VM while the server is off.
+  # its credentials and port do not reach the VM while the server is off. The flag and the port
+  # come from the non-sensitive locals, so that the startup script is sensitive only while
+  # it carries the credentials, and its changes show in the plan otherwise.
   adminEnv = concat(
-    [{ name = "ADMIN_SERVER", value = tostring(var.admin.enabled) }],
+    [{ name = "ADMIN_SERVER", value = tostring(local.adminEnabled) }],
     local.adminEnabled ? [for item in local.adminSettings : item if item.value != null] : []
   )
 }
