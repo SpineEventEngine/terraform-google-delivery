@@ -46,19 +46,24 @@ locals {
   adminServerPort = coalesce(local.adminPort, 8080)
   # The TCP ports the VM listens on: SSH, the Delivery server, and the Admin server when enabled.
   vmPorts = concat([22, var.port], local.adminEnabled ? [local.adminServerPort] : [])
-  adminSettings = [
-    { name = "ADMIN_USERNAME", value = var.admin.login },
-    { name = "ADMIN_PASSWORD", value = var.admin.password },
-    { name = "MICRONAUT_SERVER_PORT", value = tostring(local.adminPort) },
-  ]
+  # Whether the login and the password are set. The validation of `admin` guarantees they
+  # are set together.
+  adminHasCredentials = nonsensitive(var.admin.login != null)
 
   # The flag is passed always, the settings only when the Admin server is enabled, so that
-  # its credentials and port do not reach the VM while the server is off. The flag and the port
-  # come from the non-sensitive locals, so that the startup script is sensitive only while
-  # it carries the credentials, and its changes show in the plan otherwise.
+  # its credentials and port do not reach the VM while the server is off. The settings are
+  # selected by non-sensitive conditions: comparing the credentials themselves would mark
+  # the whole list, and with it the startup script, sensitive even when it carries no secret,
+  # hiding its changes from the plan.
   adminEnv = concat(
     [{ name = "ADMIN_SERVER", value = tostring(local.adminEnabled) }],
-    local.adminEnabled ? [for item in local.adminSettings : item if item.value != null] : []
+    local.adminEnabled && local.adminHasCredentials ? [
+      { name = "ADMIN_USERNAME", value = var.admin.login },
+      { name = "ADMIN_PASSWORD", value = var.admin.password },
+    ] : [],
+    local.adminEnabled && local.adminPort != null ? [
+      { name = "MICRONAUT_SERVER_PORT", value = tostring(local.adminPort) },
+    ] : [],
   )
 }
 
