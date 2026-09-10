@@ -44,6 +44,8 @@ locals {
   adminPort    = try(nonsensitive(var.admin.port), null)
   # The port the Admin server listens on: the configured one, or the Micronaut default.
   adminServerPort = coalesce(local.adminPort, 8080)
+  # The TCP ports the VM listens on: SSH, the Delivery server, and the Admin server when enabled.
+  vmPorts = concat([22, var.port], local.adminEnabled ? [local.adminServerPort] : [])
   adminSettings = [
     { name = "ADMIN_SERVER", value = var.admin.enabled },
     { name = "ADMIN_USERNAME", value = var.admin.login },
@@ -87,12 +89,12 @@ resource "google_compute_instance_from_template" "delivery-server" {
   # nothing reports it to Terraform: the VM stays up without the Admin interface, or keeps
   # restarting the container when it is the Delivery server that lost the port.
   #
-  # The check is a precondition rather than a `validation` of `var.port`, because validation
-  # across variables needs Terraform 1.9, while this module supports 1.3.
+  # The check is a precondition rather than a `validation` of `var.port` or `var.admin`,
+  # because validation across variables needs Terraform 1.9, while this module supports 1.3.
   lifecycle {
     precondition {
-      condition     = var.port != 22 && (!local.adminEnabled || var.port != local.adminServerPort)
-      error_message = "The `port` must differ from the SSH port (22) and from the port of the Admin server."
+      condition     = length(distinct(local.vmPorts)) == length(local.vmPorts)
+      error_message = "The `port`, the port of the Admin server, and the SSH port (22) must differ from each other."
     }
   }
 }

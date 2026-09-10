@@ -98,6 +98,25 @@ run "admin_port_collision_rejected" {
   expect_failures = [google_compute_instance_from_template.delivery-server]
 }
 
+run "admin_port_on_ssh_rejected" {
+  command = plan
+  variables {
+    admin = { enabled = true, port = 22 }
+  }
+  expect_failures = [google_compute_instance_from_template.delivery-server]
+}
+
+run "admin_port_ignored_while_disabled" {
+  command = plan
+  variables {
+    admin = { enabled = false, port = 22 }
+  }
+  assert {
+    condition     = output.port == 8484
+    error_message = "The port of a disabled Admin server must not be checked."
+  }
+}
+
 run "distinct_admin_port_accepted" {
   command = plan
   variables {
