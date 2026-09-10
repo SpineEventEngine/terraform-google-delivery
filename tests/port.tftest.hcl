@@ -113,8 +113,24 @@ run "admin_port_ignored_while_disabled" {
   }
   assert {
     condition     = output.port == 8484
-    error_message = "The port of a disabled Admin server must not be checked."
+    error_message = "The collision check must skip the port of a disabled Admin server."
   }
+}
+
+run "fractional_admin_port_rejected" {
+  command = plan
+  variables {
+    admin = { enabled = true, port = 8080.5 }
+  }
+  expect_failures = [var.admin]
+}
+
+run "admin_port_out_of_range_rejected" {
+  command = plan
+  variables {
+    admin = { enabled = true, port = 70000 }
+  }
+  expect_failures = [var.admin]
 }
 
 run "distinct_admin_port_accepted" {

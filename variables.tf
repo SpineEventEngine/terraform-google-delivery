@@ -102,6 +102,12 @@ variable "admin" {
     condition     = (var.admin.login != null && var.admin.password != null) || (var.admin.login == null && var.admin.password == null)
     error_message = "Impossible to set only `login` or `password`, both should be set."
   }
+  validation {
+    condition = var.admin.port == null ? true : (
+      var.admin.port == floor(var.admin.port) && var.admin.port >= 1 && var.admin.port <= 65535
+    )
+    error_message = "The `port` of the Admin server must be a TCP port number: a whole number from 1 to 65535."
+  }
   default = {
     enabled = false
   }
