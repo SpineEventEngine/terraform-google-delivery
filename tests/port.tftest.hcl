@@ -73,6 +73,14 @@ run "port_out_of_range_rejected" {
   expect_failures = [var.port]
 }
 
+run "fractional_port_rejected" {
+  command = plan
+  variables {
+    port = 8484.5
+  }
+  expect_failures = [var.port]
+}
+
 run "ssh_port_rejected" {
   command = plan
   variables {

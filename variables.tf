@@ -42,8 +42,8 @@ variable "port" {
   type        = number
   default     = 8484
   validation {
-    condition     = var.port >= 1 && var.port <= 65535
-    error_message = "The `port` must be a TCP port number, from 1 to 65535."
+    condition     = var.port == floor(var.port) && var.port >= 1 && var.port <= 65535
+    error_message = "The `port` must be a TCP port number: a whole number from 1 to 65535."
   }
 }
 

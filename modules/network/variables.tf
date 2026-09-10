@@ -49,4 +49,8 @@ variable "grpc_port" {
   description = "The TCP port to open for gRPC ingress on the instances tagged `grpc`."
   type        = number
   default     = 8484
+  validation {
+    condition     = var.grpc_port == floor(var.grpc_port) && var.grpc_port >= 1 && var.grpc_port <= 65535
+    error_message = "The `grpc_port` must be a TCP port number: a whole number from 1 to 65535."
+  }
 }
