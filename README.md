@@ -129,9 +129,9 @@ module "delivery" {
 **[2]** The Delivery server is distributed as a Docker image on the public Google Artifact Registry.
 Every release is tagged `v<version>`, and the `latest` tag follows the `master` branch of the
 [`delivery`][delivery-repo] repository. Pin a release tag in production, so that a reboot of the VM
-does not pull a different server. Release `v0.24.0` breaks compatibility with the `0.9.x` clients
-because it renames the gRPC services of the server. See its [release notes][delivery-release]
-before upgrading.
+does not pull a different server. Delivery server release `v0.24.0` breaks compatibility with the
+`0.9.x` clients because it renames the gRPC services of the server. See the
+[release notes][delivery-release] before upgrading.
 
 **[3]** This parameter allows to set the machine type that will be running the Delivery server. By default, the value
 is set to `e2-highcpu-2`([machine description][e2-machine]) so this parameter may be safely deleted if you don't want 
