@@ -8,7 +8,7 @@ and the VM IP address.
 
 Following the best practices, the Delivery server will reside in its own VPC and region.
 
-When working with App Engine applications, consider picking up a region closed to the App Engine
+When working with App Engine applications, consider picking up a region close to the App Engine
 apps location.
 
 Requirements
