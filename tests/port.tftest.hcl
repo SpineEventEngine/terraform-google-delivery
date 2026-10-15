@@ -22,7 +22,7 @@ variables {
   project    = "example-project"
   region     = "europe-west1"
   zone       = "europe-west1-b"
-  container  = "europe-docker.pkg.dev/spine-event-engine/containers/delivery-server:v0.19.0"
+  container  = "europe-docker.pkg.dev/spine-event-engine/containers/delivery-server:v0.24.0"
   vm_address = "203.0.113.10"
 }
 
