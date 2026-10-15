@@ -98,11 +98,11 @@ resource "google_compute_address" "delivery-ip" {   # IP the main application wi
 
 module "delivery" {
   source     = "SpineEventEngine/delivery/google"
-  version    = "0.12.0"   # Version of the `delivery` Terraform module.
+  version    = "0.24.0"   # Version of the `delivery` Terraform module.
   project    = var.project   # Refers to the “project” variable in the `variables.tf` file.
   region     = var.region   # Refers to the “region” variable in the `variables.tf` file.
   zone       = var.zone   # Refers to the “zone” variable in the `variables.tf` file.
-  container  = "europe-docker.pkg.dev/spine-event-engine/containers/delivery-server:v0.19.0"   # The Delivery server image to deploy [2].
+  container  = "europe-docker.pkg.dev/spine-event-engine/containers/delivery-server:v0.24.0"   # The Delivery server image to deploy [2].
   port       = 8484   # Port on which the Delivery server accepts gRPC connections. Optional parameter; `8484` when omitted.
   vm_address = google_compute_address.delivery-ip.address   # Refers to the `delivery-ip` resource that 
                                                           # we've configured in this file above.
@@ -129,7 +129,9 @@ module "delivery" {
 **[2]** The Delivery server is distributed as a Docker image on the public Google Artifact Registry.
 Every release is tagged `v<version>`, and the `latest` tag follows the `master` branch of the
 [`delivery`][delivery-repo] repository. Pin a release tag in production, so that a reboot of the VM
-does not pull a different server.
+does not pull a different server. Release `v0.24.0` breaks compatibility with the `0.9.x` clients
+because it renames the gRPC services of the server. See its [release notes][delivery-release]
+before upgrading.
 
 **[3]** This parameter allows to set the machine type that will be running the Delivery server. By default, the value
 is set to `e2-highcpu-2`([machine description][e2-machine]) so this parameter may be safely deleted if you don't want 
@@ -207,6 +209,7 @@ recreated under the new names, with a downtime while that happens. The static IP
 declared outside the module and is kept.
 
 [adc]: https://cloud.google.com/docs/authentication/application-default-credentials
+[delivery-release]: https://github.com/SpineEventEngine/delivery/releases/tag/v0.24.0
 [delivery-repo]: https://github.com/SpineEventEngine/delivery
 [e2-machine]: https://cloud.google.com/compute/docs/general-purpose-machines#e2_machine_types_table
 [gce-machine-resource]: https://cloud.google.com/compute/docs/machine-resource
